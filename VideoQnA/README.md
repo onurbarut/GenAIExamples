@@ -108,3 +108,29 @@ By default, the embedding and LVM models are set to a default value as listed be
 For full instruction of deployment, please check [Guide](docker_compose/intel/cpu/xeon/README.md)
 
 Currently we support deploying VideoQnA services with docker compose, using the docker images `built from source`. Find the corresponding [compose.yaml](docker_compose/intel/cpu/xeon/compose.yaml).
+
+## Fine-Tuning the vCLIP Model for Video Retrieval
+To fine-tune the [vCLIP](https://github.com/opea-project/GenAIComps/blob/main/comps/dataprep/vdms/multimodal_langchain/utils/vclip.py) model for video retrieval, you will use a dataset like [ActivityNet Captions](https://huggingface.co/datasets/HuggingFaceM4/ActivitiyNet_Captions), which contains video clips with corresponding textual descriptions. The vCLIP model operates by aggregating frame-level embeddings from individual frames of a video, using the CLIP model to form a video-level representation.
+
+### Steps for Fine-Tuning:
+1. Dataset Preparation:
+
+- Extract video frames from each clip in the dataset.
+- Convert the frames into embeddings using a pre-trained CLIP model. These embeddings are then mean-aggregated to form a single embedding for the entire video.
+
+2. Model Architecture:
+
+- The vCLIP model leverages the CLIP model's embedding capabilities. For fine-tuning, a contrastive learning approach is commonly applied, where video embeddings are matched with their corresponding text descriptions.
+- Refer to the [vclip.py](https://github.com/opea-project/GenAIComps/blob/main/comps/dataprep/vdms/multimodal_langchain/utils/vclip.py) for model definition.
+
+3. Fine-Tuning Procedure:
+
+- Fine-tune the vCLIP model by optimizing it to align video embeddings with their corresponding text embeddings.
+- Contrastive loss is typically used to maximize similarity between positive pairs (video and matching caption) while minimizing similarity with non-matching captions.
+- Leverage sample fine-tuning code for models like CLIP from the Hugging Face library.
+
+4. Using the Fine-Tuned Model:
+
+- After fine-tuning, replace the base embedding model in your VideoQnA pipeline with the fine-tuned vCLIP model.
+- Store the video embeddings in Intel VDMS and use them for retrieval during user queries.
+- By following this approach, the fine-tuned vCLIP model will be better equipped to perform video retrieval tasks based on textual descriptions, improving accuracy in VideoQnA.
